@@ -1,0 +1,20 @@
+#cloud-config
+packages:
+    - openvpn
+write_files:
+  - path: /etc/openvpn/yovpn-server.conf
+    content: |
+        dev tun
+        secret secret.key
+        user nobody
+        group nogroup
+        ifconfig 10.42.86.1 10.42.86.2
+        cipher AES-128-CBC
+        comp-lzo
+        persist-key
+        persist-tun
+runcmd:
+    - echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+    - sysctl -w net.ipv4.ip_forward=1
+    - openvpn --genkey --secret /etc/openvpn/secret.key
+    - service openvpn restart
