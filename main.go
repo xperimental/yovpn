@@ -10,6 +10,7 @@ import (
 )
 
 var token = flag.String("token", "", "DigitalOcean access token")
+var regions = flag.Bool("regions", false, "If true, will display all available regions")
 
 func initClient() *godo.Client {
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: *token})
@@ -36,6 +37,11 @@ func main() {
 	flag.Parse()
 
 	client := initClient()
+
+	if *regions {
+		showRegions(client)
+		return
+	}
 
 	log.Println("Looking for key...")
 	key, err := createKey(client)
