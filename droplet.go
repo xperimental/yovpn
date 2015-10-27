@@ -9,6 +9,7 @@ import (
 	"github.com/digitalocean/godo"
 )
 
+var name = flag.String("name", "yovpn", "Name of droplet (does not need to be unique)")
 var image = flag.String("image", "ubuntu-14-04-x64", "Default image for droplet")
 var size = flag.String("size", "512mb", "Default size for droplet")
 var region = flag.String("region", "nyc2", "Default region for droplet")
@@ -30,7 +31,7 @@ func readCloudConfig() string {
 func createDroplet(client *godo.Client, key *godo.Key) *godo.Droplet {
 	userData := readCloudConfig()
 	createRequest := &godo.DropletCreateRequest{
-		Name:   "yovpn",
+		Name:   *name,
 		Region: *region,
 		Size:   *size,
 		Image:  godo.DropletCreateImage{Slug: *image},
@@ -47,4 +48,20 @@ func createDroplet(client *godo.Client, key *godo.Key) *godo.Droplet {
 		log.Fatal(err)
 	}
 	return drop
+}
+
+func deleteDroplets(client *godo.Client) {
+	droplets, _, err := client.Droplets.List(&godo.ListOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, drop := range droplets {
+		if drop.Name == *name {
+			log.Printf("Deleting %s (%d)", drop.Name, drop.ID)
+			if _, err := client.Droplets.Delete(drop.ID); err != nil {
+				log.Println("Droplet failed to delete.")
+			}
+		}
+	}
 }

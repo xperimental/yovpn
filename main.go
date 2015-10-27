@@ -11,6 +11,7 @@ import (
 
 var token = flag.String("token", "", "DigitalOcean access token")
 var regions = flag.Bool("regions", false, "If true, will display all available regions")
+var destroy = flag.Bool("destroy", false, "If true, will remove all yovpn droplets")
 
 func initClient() *godo.Client {
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: *token})
@@ -40,6 +41,11 @@ func main() {
 
 	if *regions {
 		showRegions(client)
+		return
+	}
+
+	if *destroy {
+		deleteDroplets(client)
 		return
 	}
 
