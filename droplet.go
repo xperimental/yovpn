@@ -18,6 +18,7 @@ func readCloudConfig() string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 
 	buf, err := ioutil.ReadAll(file)
 	if err != nil {

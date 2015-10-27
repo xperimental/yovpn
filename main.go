@@ -17,6 +17,21 @@ func initClient() *godo.Client {
 	return godo.NewClient(oauthClient)
 }
 
+func waitForNetwork(client *godo.Client, dropletID int) string {
+	for {
+		drop, _, err := client.Droplets.Get(dropletID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if drop.Status == "active" {
+			if len(drop.Networks.V4) > 0 {
+				return drop.Networks.V4[0].IPAddress
+			}
+		}
+		<-time.After(time.Second * 5)
+	}
+}
+
 func main() {
 	flag.Parse()
 
@@ -31,19 +46,17 @@ func main() {
 
 	log.Println("Creating droplet...")
 	drop := createDroplet(client, key)
-	log.Printf("Created droplet %s", drop.Name)
+	log.Printf("Created droplet %s (%d)", drop.Name, drop.ID)
 
 	log.Println("Waiting for droplet to be ready...")
-	for {
-		drop, _, err := client.Droplets.Get(drop.ID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if drop.Status == "active" {
-			break
-		}
-		<-time.After(time.Second)
-	}
-	log.Println("Droplet is ready.")
-	log.Printf("Networks: %+v", drop.Networks)
+	dropletIP := waitForNetwork(client, drop.ID)
+	log.Printf("Droplet is ready: %s", dropletIP)
+
+	log.Println("Reading secret...")
+	secret := readSecret(dropletIP)
+	log.Printf("Successfully read secret.")
+
+	log.Println("Writing configuration...")
+	file := writeConfigFile(dropletIP, secret)
+	log.Printf("Written configuration to %s", file)
 }
