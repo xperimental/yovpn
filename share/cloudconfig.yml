@@ -13,8 +13,19 @@ write_files:
         comp-lzo
         persist-key
         persist-tun
+  - path: /root/enable-nat.sh
+    content: |
+        #!/bin/bash
+        NAT_INTERN=tap0
+        NAT_EXTERN=eth0
+        echo 1 > /proc/sys/net/ipv4/ip_forward
+        iptables -t nat -A POSTROUTING -o $NAT_EXTERN -j MASQUERADE
+        iptables -A FORWARD -i $NAT_INTERN -o $NAT_EXTERN -m state --state RELATED,ESTABLISHED -j ACCEPT
+        iptables -A FORWARD -i $NAT_EXTERN -o $NAT_INTERN -j ACCEPT
 runcmd:
     - echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
     - sysctl -w net.ipv4.ip_forward=1
+    - sh /root/enable-nat.sh
     - openvpn --genkey --secret /etc/openvpn/secret.key
     - service openvpn restart
+    - touch /root/yovpn.ready

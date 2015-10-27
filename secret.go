@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -27,7 +28,7 @@ func readKey() []byte {
 	return buf
 }
 
-func readSecret(ip string) string {
+func createSSHClient(ip string) (*ssh.Client, error) {
 	key := readKey()
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
@@ -40,7 +41,11 @@ func readSecret(ip string) string {
 			ssh.PublicKeys(signer),
 		},
 	}
-	client, err := ssh.Dial("tcp", net.JoinHostPort(ip, "22"), config)
+	return ssh.Dial("tcp", net.JoinHostPort(ip, "22"), config)
+}
+
+func readSecret(ip string) string {
+	client, err := createSSHClient(ip)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,4 +64,22 @@ func readSecret(ip string) string {
 	}
 
 	return b.String()
+}
+
+func waitForSetup(ip string) {
+	for {
+		client, err := createSSHClient(ip)
+		if err == nil {
+			session, err := client.NewSession()
+			if err == nil {
+				defer session.Close()
+				err = session.Run("cat /root/yovpn.ready")
+				if err == nil {
+					break
+				}
+			}
+		}
+		log.Printf("Waiting for SSH connection... (%s)\n", err)
+		<-time.After(time.Second * 10)
+	}
 }

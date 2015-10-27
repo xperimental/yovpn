@@ -52,6 +52,10 @@ func main() {
 	dropletIP := waitForNetwork(client, drop.ID)
 	log.Printf("Droplet is ready: %s", dropletIP)
 
+	log.Println("Waiting for setup script to complete...")
+	waitForSetup(dropletIP)
+	log.Println("Setup complete.")
+
 	log.Println("Reading secret...")
 	secret := readSecret(dropletIP)
 	log.Printf("Successfully read secret.")
