@@ -4,12 +4,16 @@ import (
 	"flag"
 	"fmt"
 
+	"golang.org/x/crypto/ssh"
+
 	"github.com/digitalocean/godo"
 )
 
 var keyName = flag.String("key", "yovpn", "SSH key to use for droplet")
 
-func createKey(client *godo.Client) (*godo.Key, error) {
+var errKeyNotFound = fmt.Errorf("No key found with name %s", *keyName)
+
+func loadPublicKey(client *godo.Client) (*godo.Key, error) {
 	keys, _, err := client.Keys.List(&godo.ListOptions{})
 	if err != nil {
 		return nil, err
@@ -19,5 +23,14 @@ func createKey(client *godo.Client) (*godo.Key, error) {
 			return &key, nil
 		}
 	}
-	return nil, fmt.Errorf("No key found with name %s", *keyName)
+	return nil, errKeyNotFound
+}
+
+func uploadPublicKey(client *godo.Client, publicKey ssh.PublicKey) (*godo.Key, error) {
+	createRequest := &godo.KeyCreateRequest{
+		Name:      *keyName,
+		PublicKey: string(ssh.MarshalAuthorizedKey(publicKey)),
+	}
+	key, _, err := client.Keys.Create(createRequest)
+	return key, err
 }

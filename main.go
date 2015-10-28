@@ -55,8 +55,16 @@ func main() {
 	log.Printf("Loaded key: %s\n", sshKeyFingerprint)
 
 	log.Println("Looking for key...")
-	key, err := createKey(client)
-	if err != nil {
+	key, err := loadPublicKey(client)
+	switch {
+	case err == errKeyNotFound:
+		log.Println("Key not found. Uploading...")
+		key, err = uploadPublicKey(client, sshKey.PublicKey())
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Uploaded key.")
+	case err != nil:
 		log.Fatal(err)
 	}
 	if key.Fingerprint != sshKeyFingerprint {
