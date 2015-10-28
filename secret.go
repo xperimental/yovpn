@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/md5"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -28,13 +30,30 @@ func readKey() []byte {
 	return buf
 }
 
-func createSSHClient(ip string) (*ssh.Client, error) {
+func loadPrivateKey() ssh.Signer {
 	key := readKey()
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return signer
+}
 
+func publicFingerprint(key ssh.Signer) string {
+	h := md5.New()
+	h.Write(key.PublicKey().Marshal())
+	sum := h.Sum(nil)
+	var buf bytes.Buffer
+	for i, b := range sum {
+		buf.WriteString(fmt.Sprintf("%x", b))
+		if i < len(sum)-1 {
+			buf.WriteRune(':')
+		}
+	}
+	return buf.String()
+}
+
+func createSSHClient(signer ssh.Signer, ip string) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: "root",
 		Auth: []ssh.AuthMethod{
@@ -60,9 +79,9 @@ func readSecret(client *ssh.Client) string {
 	return b.String()
 }
 
-func waitForSetup(ip string) *ssh.Client {
+func waitForSetup(signer ssh.Signer, ip string) *ssh.Client {
 	for {
-		client, err := createSSHClient(ip)
+		client, err := createSSHClient(signer, ip)
 		if err == nil {
 			session, err := client.NewSession()
 			if err == nil {

@@ -49,10 +49,18 @@ func main() {
 		return
 	}
 
+	log.Println("Loading SSH key...")
+	sshKey := loadPrivateKey()
+	sshKeyFingerprint := publicFingerprint(sshKey)
+	log.Printf("Loaded key: %s\n", sshKeyFingerprint)
+
 	log.Println("Looking for key...")
 	key, err := createKey(client)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if key.Fingerprint != sshKeyFingerprint {
+		log.Fatal("Key fingerprints do not match!")
 	}
 	log.Printf("Using key with fingerprint %s", key.Fingerprint)
 
@@ -65,7 +73,7 @@ func main() {
 	log.Printf("Droplet is ready: %s", dropletIP)
 
 	log.Println("Waiting for setup script to complete...")
-	sshClient := waitForSetup(dropletIP)
+	sshClient := waitForSetup(sshKey, dropletIP)
 	defer sshClient.Close()
 	log.Println("Setup complete.")
 
