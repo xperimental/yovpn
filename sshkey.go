@@ -47,7 +47,11 @@ func publicFingerprint(key ssh.Signer) string {
 	sum := h.Sum(nil)
 	var buf bytes.Buffer
 	for i, b := range sum {
-		buf.WriteString(fmt.Sprintf("%x", b))
+		bs := fmt.Sprintf("%x", b)
+		if len(bs) == 1 {
+			buf.WriteRune('0')
+		}
+		buf.WriteString(bs)
 		if i < len(sum)-1 {
 			buf.WriteRune(':')
 		}

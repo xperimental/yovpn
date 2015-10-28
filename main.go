@@ -82,7 +82,9 @@ func main() {
 		log.Fatal(err)
 	}
 	if key.Fingerprint != sshKeyFingerprint {
-		log.Fatal("Key fingerprints do not match!")
+		log.Printf("Local:  %s", sshKeyFingerprint)
+		log.Printf("Remote: %s", key.Fingerprint)
+		log.Fatalf("Key fingerprints do not match!", sshKeyFingerprint, key.Fingerprint)
 	}
 	log.Printf("Using key with fingerprint %s", key.Fingerprint)
 
