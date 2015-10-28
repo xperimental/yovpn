@@ -44,13 +44,7 @@ func createSSHClient(ip string) (*ssh.Client, error) {
 	return ssh.Dial("tcp", net.JoinHostPort(ip, "22"), config)
 }
 
-func readSecret(ip string) string {
-	client, err := createSSHClient(ip)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-
+func readSecret(client *ssh.Client) string {
 	session, err := client.NewSession()
 	if err != nil {
 		log.Fatal(err)
@@ -66,7 +60,7 @@ func readSecret(ip string) string {
 	return b.String()
 }
 
-func waitForSetup(ip string) {
+func waitForSetup(ip string) *ssh.Client {
 	for {
 		client, err := createSSHClient(ip)
 		if err == nil {
@@ -75,7 +69,7 @@ func waitForSetup(ip string) {
 				defer session.Close()
 				err = session.Run("cat /root/yovpn.ready")
 				if err == nil {
-					break
+					return client
 				}
 			}
 		}

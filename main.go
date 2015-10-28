@@ -65,11 +65,12 @@ func main() {
 	log.Printf("Droplet is ready: %s", dropletIP)
 
 	log.Println("Waiting for setup script to complete...")
-	waitForSetup(dropletIP)
+	sshClient := waitForSetup(dropletIP)
+	defer sshClient.Close()
 	log.Println("Setup complete.")
 
 	log.Println("Reading secret...")
-	secret := readSecret(dropletIP)
+	secret := readSecret(sshClient)
 	log.Printf("Successfully read secret.")
 
 	log.Println("Writing configuration...")
