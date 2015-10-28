@@ -45,11 +45,13 @@ func main() {
 	client := initClient()
 
 	if *regions {
+		log.Println("Showing regions...")
 		showRegions(client)
 		return
 	}
 
 	if *destroy {
+		log.Println("Removing droplets...")
 		deleteDroplets(client)
 		return
 	}
