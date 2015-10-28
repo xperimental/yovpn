@@ -11,7 +11,7 @@ import (
 
 var token = flag.String("token", "", "DigitalOcean access token")
 var regions = flag.Bool("regions", false, "If true, will display all available regions")
-var destroy = flag.Bool("destroy", false, "If true, will remove all yovpn droplets")
+var destroy = flag.Bool("destroy", false, "If true, will remove all droplets with given name")
 
 func initClient() *godo.Client {
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: *token})
@@ -36,6 +36,11 @@ func waitForNetwork(client *godo.Client, dropletID int) string {
 
 func main() {
 	flag.Parse()
+
+	if len(*token) == 0 {
+		log.Fatal("Token can not be empty!")
+		return
+	}
 
 	client := initClient()
 
