@@ -57,7 +57,14 @@ func main() {
 	}
 
 	log.Println("Loading SSH key...")
-	sshKey := loadPrivateKey()
+	sshKey, err := loadPrivateKey()
+	switch {
+	case err == errKeyNotFound:
+		log.Println("SSH Key not found! Creating...")
+		sshKey = createPrivateKey()
+	case err != nil:
+		log.Fatal(err)
+	}
 	sshKeyFingerprint := publicFingerprint(sshKey)
 	log.Printf("Loaded key: %s\n", sshKeyFingerprint)
 

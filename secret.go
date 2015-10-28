@@ -2,56 +2,12 @@ package main
 
 import (
 	"bytes"
-	"crypto/md5"
-	"flag"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
-	"os"
 	"time"
 
 	"golang.org/x/crypto/ssh"
 )
-
-var keyfile = flag.String("keyfile", "yovpn.key", "SSH keyfile to use for connection")
-
-func readKey() []byte {
-	file, err := os.Open(*keyfile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	buf, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return buf
-}
-
-func loadPrivateKey() ssh.Signer {
-	key := readKey()
-	signer, err := ssh.ParsePrivateKey(key)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return signer
-}
-
-func publicFingerprint(key ssh.Signer) string {
-	h := md5.New()
-	h.Write(key.PublicKey().Marshal())
-	sum := h.Sum(nil)
-	var buf bytes.Buffer
-	for i, b := range sum {
-		buf.WriteString(fmt.Sprintf("%x", b))
-		if i < len(sum)-1 {
-			buf.WriteRune(':')
-		}
-	}
-	return buf.String()
-}
 
 func createSSHClient(signer ssh.Signer, ip string) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
