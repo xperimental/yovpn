@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 
 	"golang.org/x/crypto/ssh"
 
@@ -33,4 +34,17 @@ func uploadPublicKey(client *godo.Client, publicKey ssh.PublicKey) (*godo.Key, e
 	}
 	key, _, err := client.Keys.Create(createRequest)
 	return key, err
+}
+
+func deletePublicKey(client *godo.Client) {
+	keys, _, err := client.Keys.List(&godo.ListOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, key := range keys {
+		if key.Name == *keyName {
+			log.Printf("Deleting key with fingerprint %s", key.Fingerprint)
+			client.Keys.DeleteByFingerprint(key.Fingerprint)
+		}
+	}
 }

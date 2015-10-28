@@ -53,6 +53,8 @@ func main() {
 	if *destroy {
 		log.Println("Removing droplets...")
 		deleteDroplets(client)
+		log.Println("Remove SSH key from DigitalOcean...")
+		deletePublicKey(client)
 		return
 	}
 
@@ -84,7 +86,7 @@ func main() {
 	if key.Fingerprint != sshKeyFingerprint {
 		log.Printf("Local:  %s", sshKeyFingerprint)
 		log.Printf("Remote: %s", key.Fingerprint)
-		log.Fatalf("Key fingerprints do not match!", sshKeyFingerprint, key.Fingerprint)
+		log.Fatal("Key fingerprints do not match!", sshKeyFingerprint, key.Fingerprint)
 	}
 	log.Printf("Using key with fingerprint %s", key.Fingerprint)
 
