@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-const keyBaseName = "yovpn"
+const keyBaseName = "yovpn-"
 
 func uploadPublicKey(client *godo.Client, publicKey ssh.PublicKey, id string) (*godo.Key, error) {
 	createRequest := &godo.KeyCreateRequest{
