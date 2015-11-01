@@ -10,8 +10,7 @@ func StartProvision(provisioner *provisioner.Provisioner) func(w http.ResponseWr
 	return func(w http.ResponseWriter, r *http.Request) {
 		region := r.URL.Query().Get("region")
 		if len(region) == 0 {
-			w.WriteHeader(400)
-			w.Write([]byte("You need to provide a region!"))
+			writeJSON(w, 400, jsonError{Error: "You need to provide a region!"})
 			return
 		}
 

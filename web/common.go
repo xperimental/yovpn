@@ -6,11 +6,14 @@ import (
 	"net/http"
 )
 
+type jsonError struct {
+	Error string `json:"error"`
+}
+
 func handleError(w http.ResponseWriter, err error, msg string) {
 	log.Printf("ERROR \"%s\": %+v", msg, err)
 
-	w.WriteHeader(500)
-	w.Write([]byte(msg))
+	writeJSON(w, 500, jsonError{Error: msg})
 }
 
 func writeJSON(w http.ResponseWriter, status int, content interface{}) {
@@ -20,6 +23,7 @@ func writeJSON(w http.ResponseWriter, status int, content interface{}) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 	w.Write(data)
 }
