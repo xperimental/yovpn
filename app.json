@@ -1,0 +1,16 @@
+{
+  "name": "yovpn",
+  "description": "Self-hosted VPN made simple.",
+  "keywords": [
+    "vpn",
+    "openvpn"
+  ],
+  "repository": "https://github.com/xperimental/yovpn",
+  "env": {
+    "DIGITALOCEAN_TOKEN": {
+      "description": "Token for accessing DigitalOcean API."
+    }
+  },
+  "addons": [],
+  "buildpacks": []
+}
