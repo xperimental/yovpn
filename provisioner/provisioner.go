@@ -107,6 +107,8 @@ func (p Provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
 
 	log.Println("Remove SSH key from DigitalOcean...")
 	deletePublicKey(p.client, doKey)
+
+	endpoint.Status = Running
 }
 
 func (p Provisioner) unprovisionEndpoint(endpoint *Endpoint) {
