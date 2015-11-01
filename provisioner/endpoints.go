@@ -68,8 +68,28 @@ func (p Provisioner) CreateEndpoint(region string) Endpoint {
 	return *endpoint
 }
 
+func (p Provisioner) ListEndpoints() []Endpoint {
+	var result []Endpoint
+	for _, endpoint := range p.endpoints {
+		result = append(result, *endpoint)
+	}
+	return result
+}
+
 func (p Provisioner) GetEndpoint(id string) (Endpoint, error) {
 	if endpoint, ok := p.endpoints[id]; ok {
+		return *endpoint, nil
+	}
+	return Endpoint{}, ErrNotFound
+}
+
+func (p Provisioner) DestroyEndpoint(id string) (Endpoint, error) {
+	if endpoint, ok := p.endpoints[id]; ok {
+		err := deleteDroplet(p.client, endpoint.DropletID)
+		if err != nil {
+			return Endpoint{}, err
+		}
+		endpoint.Status = Destroyed
 		return *endpoint, nil
 	}
 	return Endpoint{}, ErrNotFound

@@ -19,9 +19,7 @@ func main() {
 	}
 
 	log.Println("Setup handlers...")
-	http.HandleFunc("/regions", web.RegionsHandler(provisioner))
-	http.HandleFunc("/provision", web.StartProvision(provisioner))
-	http.HandleFunc("/endpoint", web.EndpointHandler(provisioner))
+	web.SetupHandlers(provisioner)
 	http.HandleFunc("/", web.BlankPage)
 
 	log.Printf("Listen on %s", config.Port)

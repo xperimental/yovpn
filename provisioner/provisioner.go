@@ -108,3 +108,10 @@ func (p Provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
 	log.Println("Remove SSH key from DigitalOcean...")
 	deletePublicKey(p.client, doKey)
 }
+
+func (p Provisioner) unprovisionEndpoint(endpoint *Endpoint) {
+	err := deleteDroplet(p.client, endpoint.DropletID)
+	if err == nil {
+		endpoint.Status = Destroyed
+	}
+}

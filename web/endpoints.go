@@ -23,3 +23,12 @@ func EndpointHandler(provisioner *provisioner.Provisioner) func(w http.ResponseW
 		writeJSON(w, 200, endpoint)
 	}
 }
+
+func CleanupHandler(provisioner *provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		endpoints := provisioner.ListEndpoints()
+		for _, endpoint := range endpoints {
+			provisioner.DestroyEndpoint(endpoint.ID)
+		}
+	}
+}
