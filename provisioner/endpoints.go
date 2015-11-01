@@ -1,6 +1,12 @@
 package provisioner
 
-import "code.google.com/p/go-uuid/uuid"
+import (
+	"log"
+	"strings"
+
+	"code.google.com/p/go-uuid/uuid"
+	"github.com/digitalocean/godo"
+)
 
 const (
 	Starting  = "starting"
@@ -24,6 +30,32 @@ func newEndpoint() *Endpoint {
 		Config:    "",
 		DropletID: 0,
 		Status:    Starting,
+	}
+}
+
+func (p Provisioner) restoreEndpoints() {
+	droplets, _, err := p.client.Droplets.List(&godo.ListOptions{})
+	if err != nil {
+		log.Printf("Error restoring endpoints: %s", err)
+		return
+	}
+
+	for _, droplet := range droplets {
+		if strings.HasPrefix(droplet.Name, baseName) {
+			id := strings.TrimPrefix(droplet.Name, baseName)
+			if _, err := p.GetEndpoint(id); err == ErrNotFound {
+				ip := droplet.Networks.V4[0].IPAddress
+				endpoint := &Endpoint{
+					ID:        id,
+					IP:        ip,
+					Config:    "",
+					DropletID: droplet.ID,
+					Status:    Running,
+				}
+				p.endpoints[id] = endpoint
+				log.Printf("Recovered endpoint with id %s", id)
+			}
+		}
 	}
 }
 

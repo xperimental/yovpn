@@ -40,10 +40,13 @@ func NewProvisioner(token string) (*Provisioner, error) {
 		return nil, fmt.Errorf("Token is not valid!")
 	}
 
-	return &Provisioner{
+	provisioner := &Provisioner{
 		client:    client,
 		endpoints: make(map[string]*Endpoint),
-	}, nil
+	}
+	go provisioner.restoreEndpoints()
+
+	return provisioner, nil
 }
 
 func (p Provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
