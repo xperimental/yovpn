@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"code.google.com/p/go-uuid/uuid"
+
 	"github.com/digitalocean/godo"
 	"golang.org/x/oauth2"
 )
@@ -21,6 +23,16 @@ type Provisioner struct {
 
 var ErrNoToken = fmt.Errorf("No token provided!")
 
+func checkToken(client *godo.Client) bool {
+	log.Println("Checking token...")
+	account, _, err := client.Account.Get()
+	if err != nil {
+		return false
+	}
+
+	return account.Status == "active"
+}
+
 func NewProvisioner(token string) (*Provisioner, error) {
 	if len(token) == 0 {
 		return nil, ErrNoToken
@@ -29,6 +41,9 @@ func NewProvisioner(token string) (*Provisioner, error) {
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	oauthClient := oauth2.NewClient(oauth2.NoContext, tokenSource)
 	client := godo.NewClient(oauthClient)
+	if !checkToken(client) {
+		return nil, fmt.Errorf("Token is not valid!")
+	}
 
 	return &Provisioner{
 		client: client,
