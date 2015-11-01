@@ -1,4 +1,4 @@
-package main
+package provisioner
 
 import (
 	"bytes"
@@ -7,39 +7,10 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 
 	"golang.org/x/crypto/ssh"
 )
-
-var keyfile = flag.String("keyfile", "yovpn.key", "SSH keyfile to use for connection")
-
-func readKey() (key []byte, err error) {
-	file, err := os.Open(*keyfile)
-	switch {
-	case os.IsNotExist(err):
-		err = errKeyNotFound
-		return
-	case err != nil:
-		return
-	}
-	defer file.Close()
-
-	key, err = ioutil.ReadAll(file)
-	return
-}
-
-func loadPrivateKey() (ssh.Signer, error) {
-	key, err := readKey()
-	if err != nil {
-		return nil, err
-	}
-	return ssh.ParsePrivateKey(key)
-}
 
 func publicFingerprint(key ssh.Signer) string {
 	h := md5.New()
@@ -59,10 +30,10 @@ func publicFingerprint(key ssh.Signer) string {
 	return buf.String()
 }
 
-func createPrivateKey() ssh.Signer {
+func createPrivateKey() (signer ssh.Signer, err error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	privateKeyDer := x509.MarshalPKCS1PrivateKey(privateKey)
@@ -71,15 +42,8 @@ func createPrivateKey() ssh.Signer {
 		Headers: nil,
 		Bytes:   privateKeyDer,
 	}
-	pemBytes := pem.EncodeToMemory(privateKeyPem)
-	err = ioutil.WriteFile(*keyfile, pemBytes, 0600)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	signer, err := ssh.ParsePrivateKey(pemBytes)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return signer
+	pemBytes := pem.EncodeToMemory(privateKeyPem)
+	signer, err = ssh.ParsePrivateKey(pemBytes)
+	return
 }

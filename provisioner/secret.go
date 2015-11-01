@@ -1,4 +1,4 @@
-package main
+package provisioner
 
 import (
 	"bytes"
@@ -19,20 +19,20 @@ func createSSHClient(signer ssh.Signer, ip string) (*ssh.Client, error) {
 	return ssh.Dial("tcp", net.JoinHostPort(ip, "22"), config)
 }
 
-func readSecret(client *ssh.Client) string {
+func readSecret(client *ssh.Client) (string, error) {
 	session, err := client.NewSession()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	defer session.Close()
 
 	var b bytes.Buffer
 	session.Stdout = &b
 	if err := session.Run("cat /etc/openvpn/secret.key"); err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	return b.String()
+	return b.String(), nil
 }
 
 func waitForSetup(signer ssh.Signer, ip string) *ssh.Client {

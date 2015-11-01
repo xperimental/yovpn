@@ -1,18 +1,19 @@
-package main
+package provisioner
 
 import (
-	"flag"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/digitalocean/godo"
 )
 
-var name = flag.String("name", "yovpn", "Name of droplet (does not need to be unique)")
-var image = flag.String("image", "ubuntu-14-04-x64", "Default image for droplet")
-var size = flag.String("size", "512mb", "Default size for droplet")
-var region = flag.String("region", "nyc2", "Default region for droplet")
+const (
+	defaultName  = "yovpn"
+	defaultImage = "ubuntu-14-04-x64"
+	defaultSize  = "512mb"
+)
 
 func readCloudConfig() string {
 	file, err := os.Open("share/cloudconfig.yml")
@@ -28,13 +29,13 @@ func readCloudConfig() string {
 	return string(buf)
 }
 
-func createDroplet(client *godo.Client, key *godo.Key) *godo.Droplet {
+func createDroplet(client *godo.Client, key *godo.Key, region string) (*godo.Droplet, error) {
 	userData := readCloudConfig()
 	createRequest := &godo.DropletCreateRequest{
-		Name:   *name,
-		Region: *region,
-		Size:   *size,
-		Image:  godo.DropletCreateImage{Slug: *image},
+		Name:   defaultName,
+		Region: region,
+		Size:   defaultSize,
+		Image:  godo.DropletCreateImage{Slug: defaultImage},
 		SSHKeys: []godo.DropletCreateSSHKey{
 			godo.DropletCreateSSHKey{Fingerprint: key.Fingerprint},
 		},
@@ -44,24 +45,32 @@ func createDroplet(client *godo.Client, key *godo.Key) *godo.Droplet {
 		UserData:          userData,
 	}
 	drop, _, err := client.Droplets.Create(createRequest)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return drop
+	return drop, err
 }
 
-func deleteDroplets(client *godo.Client) {
-	droplets, _, err := client.Droplets.List(&godo.ListOptions{})
-	if err != nil {
-		log.Fatal(err)
-	}
+func waitForNetwork(client *godo.Client, dropletID int) (string, error) {
+	for {
+		drop, _, err := client.Droplets.Get(dropletID)
+		if err != nil {
+			return "", err
+		}
 
-	for _, drop := range droplets {
-		if drop.Name == *name {
-			log.Printf("Deleting %s (%d)", drop.Name, drop.ID)
-			if _, err := client.Droplets.Delete(drop.ID); err != nil {
-				log.Println("Droplet failed to delete.")
+		if drop.Status == "active" {
+			if len(drop.Networks.V4) > 0 {
+				return drop.Networks.V4[0].IPAddress, nil
 			}
 		}
+		<-time.After(time.Second * 5)
 	}
+}
+
+func deleteDroplet(client *godo.Client, id int) error {
+	drop, _, err := client.Droplets.Get(id)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Deleting %s (%d)", drop.Name, drop.ID)
+	_, err = client.Droplets.Delete(drop.ID)
+	return err
 }
