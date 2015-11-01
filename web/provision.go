@@ -14,12 +14,7 @@ func StartProvision(provisioner *provisioner.Provisioner) func(w http.ResponseWr
 			return
 		}
 
-		endpoint, err := provisioner.CreateEndpoint(region)
-		if err != nil {
-			handleError(w, err, "Failed to create endpoint!")
-			return
-		}
-
+		endpoint := provisioner.CreateEndpoint(region)
 		writeJSON(w, 201, endpoint)
 	}
 }

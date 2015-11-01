@@ -4,24 +4,19 @@ import (
 	"fmt"
 	"log"
 
-	"code.google.com/p/go-uuid/uuid"
-
 	"github.com/digitalocean/godo"
 	"golang.org/x/oauth2"
 )
 
-type Endpoint struct {
-	ID        string `json:"id"`
-	IP        string `json:"ip"`
-	Config    string `json:"config"`
-	DropletID int    `json:"droplet"`
-}
-
 type Provisioner struct {
-	client *godo.Client
+	client    *godo.Client
+	endpoints map[string]*Endpoint
 }
 
-var ErrNoToken = fmt.Errorf("No token provided!")
+var (
+	ErrNoToken  = fmt.Errorf("No token provided!")
+	ErrNotFound = fmt.Errorf("Endpoint not found!")
+)
 
 func checkToken(client *godo.Client) bool {
 	log.Println("Checking token...")
@@ -46,13 +41,12 @@ func NewProvisioner(token string) (*Provisioner, error) {
 	}
 
 	return &Provisioner{
-		client: client,
+		client:    client,
+		endpoints: make(map[string]*Endpoint),
 	}, nil
 }
 
-func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error) {
-	id := uuid.New()
-
+func (p Provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
 	log.Println("Creating SSH key...")
 	sshKey, err := createPrivateKey()
 	if err != nil {
@@ -62,7 +56,7 @@ func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error
 	log.Printf("Fingerprint of key: %s\n", sshKeyFingerprint)
 
 	log.Println("Uploading key...")
-	doKey, err := uploadPublicKey(p.client, sshKey.PublicKey(), id)
+	doKey, err := uploadPublicKey(p.client, sshKey.PublicKey(), endpoint.ID)
 	if err != nil {
 		return
 	}
@@ -75,21 +69,22 @@ func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error
 	log.Printf("Using key with fingerprint %s", doKey.Fingerprint)
 
 	log.Println("Creating droplet...")
-	droplet, err := createDroplet(p.client, doKey, region, id)
+	droplet, err := createDroplet(p.client, doKey, region, endpoint.ID)
 	if err != nil {
 		return
 	}
+	endpoint.DropletID = droplet.ID
 	log.Printf("Created droplet %s (%d)", droplet.Name, droplet.ID)
 
 	log.Println("Waiting for droplet to be ready...")
-	dropletIP, err := waitForNetwork(p.client, droplet.ID)
+	endpoint.IP, err = waitForNetwork(p.client, droplet.ID)
 	if err != nil {
 		return
 	}
-	log.Printf("Droplet is ready: %s", dropletIP)
+	log.Printf("Droplet is ready: %s", endpoint.IP)
 
 	log.Println("Waiting for setup script to complete...")
-	sshClient := waitForSetup(sshKey, dropletIP)
+	sshClient := waitForSetup(sshKey, endpoint.IP)
 	defer sshClient.Close()
 	log.Println("Setup complete.")
 
@@ -101,7 +96,7 @@ func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error
 	log.Printf("Successfully read secret.")
 
 	log.Println("Writing configuration...")
-	config, err := createConfigFile(dropletIP, secret)
+	endpoint.Config, err = createConfigFile(endpoint.IP, secret)
 	if err != nil {
 		return
 	}
@@ -109,12 +104,4 @@ func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error
 
 	log.Println("Remove SSH key from DigitalOcean...")
 	deletePublicKey(p.client, doKey)
-
-	endpoint = Endpoint{
-		ID:        id,
-		IP:        dropletIP,
-		Config:    config,
-		DropletID: droplet.ID,
-	}
-	return
 }
