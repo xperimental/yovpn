@@ -9,7 +9,7 @@ import (
 )
 
 type Endpoint struct {
-	Name      string `json:"name"`
+	ID        string `json:"id"`
 	IP        string `json:"ip"`
 	Config    string `json:"config"`
 	DropletID int    `json:"droplet"`
@@ -36,6 +36,8 @@ func NewProvisioner(token string) (*Provisioner, error) {
 }
 
 func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error) {
+	id := uuid.New()
+
 	log.Println("Creating SSH key...")
 	sshKey, err := createPrivateKey()
 	if err != nil {
@@ -45,7 +47,7 @@ func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error
 	log.Printf("Fingerprint of key: %s\n", sshKeyFingerprint)
 
 	log.Println("Uploading key...")
-	doKey, err := uploadPublicKey(p.client, sshKey.PublicKey())
+	doKey, err := uploadPublicKey(p.client, sshKey.PublicKey(), id)
 	if err != nil {
 		return
 	}
@@ -58,7 +60,7 @@ func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error
 	log.Printf("Using key with fingerprint %s", doKey.Fingerprint)
 
 	log.Println("Creating droplet...")
-	droplet, err := createDroplet(p.client, doKey, region)
+	droplet, err := createDroplet(p.client, doKey, region, id)
 	if err != nil {
 		return
 	}
@@ -94,7 +96,7 @@ func (p Provisioner) CreateEndpoint(region string) (endpoint Endpoint, err error
 	deletePublicKey(p.client, doKey)
 
 	endpoint = Endpoint{
-		Name:      droplet.Name,
+		ID:        id,
 		IP:        dropletIP,
 		Config:    config,
 		DropletID: droplet.ID,

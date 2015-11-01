@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultName  = "yovpn"
+	baseName     = "yovpn-"
 	defaultImage = "ubuntu-14-04-x64"
 	defaultSize  = "512mb"
 )
@@ -29,10 +29,10 @@ func readCloudConfig() string {
 	return string(buf)
 }
 
-func createDroplet(client *godo.Client, key *godo.Key, region string) (*godo.Droplet, error) {
+func createDroplet(client *godo.Client, key *godo.Key, region string, id string) (*godo.Droplet, error) {
 	userData := readCloudConfig()
 	createRequest := &godo.DropletCreateRequest{
-		Name:   defaultName,
+		Name:   baseName + id,
 		Region: region,
 		Size:   defaultSize,
 		Image:  godo.DropletCreateImage{Slug: defaultImage},
