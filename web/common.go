@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"github.com/xperimental/yovpn/provisioner"
 )
 
 type jsonError struct {
@@ -28,11 +26,4 @@ func writeJSON(w http.ResponseWriter, status int, content interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 	w.Write(data)
-}
-
-func SetupHandlers(provisioner *provisioner.Provisioner) {
-	http.HandleFunc("/cleanup", CleanupHandler(provisioner))
-	http.HandleFunc("/endpoint", EndpointHandler(provisioner))
-	http.HandleFunc("/provision", StartProvision(provisioner))
-	http.HandleFunc("/regions", RegionsHandler(provisioner))
 }
