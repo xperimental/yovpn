@@ -4,8 +4,8 @@ import (
 	"log"
 	"strings"
 
-	"code.google.com/p/go-uuid/uuid"
 	"github.com/digitalocean/godo"
+	"github.com/pborman/uuid"
 )
 
 const (
