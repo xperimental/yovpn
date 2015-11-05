@@ -24,11 +24,17 @@ func EndpointHandler(provisioner *provisioner.Provisioner) func(w http.ResponseW
 	}
 }
 
+type deleteResult struct {
+	Count int `json:"count"`
+}
+
 func CleanupHandler(provisioner *provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		endpoints := provisioner.ListEndpoints()
 		for _, endpoint := range endpoints {
 			provisioner.DestroyEndpoint(endpoint.ID)
 		}
+
+		writeJSON(w, 200, deleteResult{Count: len(endpoints)})
 	}
 }
