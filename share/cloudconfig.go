@@ -1,3 +1,6 @@
+package share
+
+var CloudConfig string = `
 #cloud-config
 packages:
     - openvpn
@@ -29,3 +32,4 @@ runcmd:
     - openvpn --genkey --secret /etc/openvpn/secret.key
     - service openvpn restart
     - touch /root/yovpn.ready
+`

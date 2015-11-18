@@ -1,12 +1,11 @@
 package provisioner
 
 import (
-	"io/ioutil"
 	"log"
-	"os"
 	"time"
 
 	"github.com/digitalocean/godo"
+	"github.com/xperimental/yovpn/share"
 )
 
 const (
@@ -16,21 +15,10 @@ const (
 )
 
 func readCloudConfig() string {
-	file, err := os.Open("share/cloudconfig.yml")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	buf, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(buf)
+	return share.CloudConfig
 }
 
 func createDroplet(client *godo.Client, key *godo.Key, region string, id string) (*godo.Droplet, error) {
-	userData := readCloudConfig()
 	createRequest := &godo.DropletCreateRequest{
 		Name:   baseName + id,
 		Region: region,
@@ -42,7 +30,7 @@ func createDroplet(client *godo.Client, key *godo.Key, region string, id string)
 		Backups:           false,
 		IPv6:              false,
 		PrivateNetworking: false,
-		UserData:          userData,
+		UserData:          share.CloudConfig,
 	}
 	drop, _, err := client.Droplets.Create(createRequest)
 	return drop, err
