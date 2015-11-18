@@ -57,6 +57,7 @@ func (p Provisioner) restoreEndpoints() {
 			}
 		}
 	}
+	p.Signal <- struct{}{}
 }
 
 func (p Provisioner) CreateEndpoint(region string) Endpoint {

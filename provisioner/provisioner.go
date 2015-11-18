@@ -11,6 +11,7 @@ import (
 type Provisioner struct {
 	client    *godo.Client
 	endpoints map[string]*Endpoint
+	Signal    chan struct{}
 }
 
 var (
@@ -43,6 +44,7 @@ func NewProvisioner(token string) (*Provisioner, error) {
 	provisioner := &Provisioner{
 		client:    client,
 		endpoints: make(map[string]*Endpoint),
+		Signal:    make(chan struct{}),
 	}
 	go provisioner.restoreEndpoints()
 
@@ -109,6 +111,7 @@ func (p Provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
 	deletePublicKey(p.client, doKey)
 
 	endpoint.Status = Running
+	p.Signal <- struct{}{}
 }
 
 func (p Provisioner) unprovisionEndpoint(endpoint *Endpoint) {
