@@ -9,9 +9,9 @@ import (
 	"github.com/xperimental/yovpn/web"
 )
 
-func backgroundRunner(p *provisioner.Provisioner) {
+func backgroundRunner(p provisioner.Provisioner) {
 	select {
-	case <-p.Signal:
+	case <-p.Signal():
 		log.Debugf("Signal from provisioner.")
 	}
 }

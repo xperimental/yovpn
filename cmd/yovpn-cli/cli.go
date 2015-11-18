@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	<-p.Signal
+	<-p.Signal()
 
 	if destroy {
 		destroyEndpoints(p)

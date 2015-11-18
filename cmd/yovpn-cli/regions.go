@@ -6,7 +6,7 @@ import (
 	"github.com/xperimental/yovpn/provisioner"
 )
 
-func listRegions(p *provisioner.Provisioner) {
+func listRegions(p provisioner.Provisioner) {
 	regions, err := p.ListRegions()
 	if err != nil {
 		log.Fatal(err)

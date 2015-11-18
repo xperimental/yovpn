@@ -8,10 +8,21 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type Provisioner struct {
+type Provisioner interface {
+	CreateEndpoint(string) Endpoint
+	GetEndpoint(string) (Endpoint, error)
+	ListEndpoints() []Endpoint
+	DestroyEndpoint(string) (Endpoint, error)
+
+	ListRegions() ([]Region, error)
+
+	Signal() chan struct{}
+}
+
+type provisioner struct {
 	client    *godo.Client
 	endpoints map[string]*Endpoint
-	Signal    chan struct{}
+	signal    chan struct{}
 }
 
 var (
@@ -29,7 +40,7 @@ func checkToken(client *godo.Client) bool {
 	return account.Status == "active"
 }
 
-func NewProvisioner(token string) (*Provisioner, error) {
+func NewProvisioner(token string) (Provisioner, error) {
 	if len(token) == 0 {
 		return nil, ErrNoToken
 	}
@@ -41,17 +52,21 @@ func NewProvisioner(token string) (*Provisioner, error) {
 		return nil, fmt.Errorf("Token is not valid!")
 	}
 
-	provisioner := &Provisioner{
+	result := &provisioner{
 		client:    client,
 		endpoints: make(map[string]*Endpoint),
-		Signal:    make(chan struct{}),
+		signal:    make(chan struct{}),
 	}
-	go provisioner.restoreEndpoints()
+	go result.restoreEndpoints()
 
-	return provisioner, nil
+	return result, nil
 }
 
-func (p Provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
+func (p provisioner) Signal() chan struct{} {
+	return p.signal
+}
+
+func (p provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
 	log.Println("Creating SSH key...")
 	sshKey, err := createPrivateKey()
 	if err != nil {
@@ -111,10 +126,10 @@ func (p Provisioner) provisionEndpoint(endpoint *Endpoint, region string) {
 	deletePublicKey(p.client, doKey)
 
 	endpoint.Status = Running
-	p.Signal <- struct{}{}
+	p.signal <- struct{}{}
 }
 
-func (p Provisioner) unprovisionEndpoint(endpoint *Endpoint) {
+func (p provisioner) unprovisionEndpoint(endpoint *Endpoint) {
 	err := deleteDroplet(p.client, endpoint.DropletID)
 	if err == nil {
 		endpoint.Status = Destroyed

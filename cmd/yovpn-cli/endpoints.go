@@ -11,12 +11,12 @@ const (
 	fileMode = 0600
 )
 
-func provisionEndpoint(p *provisioner.Provisioner) {
+func provisionEndpoint(p provisioner.Provisioner) {
 	log.Println("Creating endpoint...")
 	e := p.CreateEndpoint(region)
 
 	log.Println("Waiting for endpoint to be ready...")
-	<-p.Signal
+	<-p.Signal()
 
 	e, err := p.GetEndpoint(e.ID)
 	if err != nil {
@@ -32,7 +32,7 @@ func provisionEndpoint(p *provisioner.Provisioner) {
 	}
 }
 
-func destroyEndpoints(p *provisioner.Provisioner) {
+func destroyEndpoints(p provisioner.Provisioner) {
 	log.Println("Destroying endpoints...")
 	endpoints := p.ListEndpoints()
 	for _, e := range endpoints {

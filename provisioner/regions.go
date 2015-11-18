@@ -39,7 +39,7 @@ func country(region godo.Region) string {
 	return ""
 }
 
-func (p Provisioner) ListRegions() ([]Region, error) {
+func (p provisioner) ListRegions() ([]Region, error) {
 	doRegions, _, err := p.client.Regions.List(&godo.ListOptions{})
 	if err != nil {
 		return nil, err
