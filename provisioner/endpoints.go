@@ -9,12 +9,14 @@ import (
 )
 
 const (
+	// Constants for endpoint status.
 	Starting  = "starting"
 	Running   = "running"
 	Failed    = "failed"
 	Destroyed = "destroyed"
 )
 
+// Endpoint contains information describing a VPN endpoint.
 type Endpoint struct {
 	ID        string `json:"id"`
 	IP        string `json:"-"`

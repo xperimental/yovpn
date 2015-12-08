@@ -6,7 +6,7 @@ import (
 	"github.com/xperimental/yovpn/provisioner"
 )
 
-func RegionsHandler(provisioner provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
+func regionsHandler(provisioner provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		regions, err := provisioner.ListRegions()
 		if err != nil {

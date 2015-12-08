@@ -2,10 +2,14 @@ package provisioner
 
 import "github.com/digitalocean/godo"
 
+// Region contains data about a region that can be used for provisioning an endpoint.
 type Region struct {
-	Name        string `json:"name"`
+	// Name of region. This is used when provisioning an endpoint.
+	Name string `json:"name"`
+	// User readable description of the region.
 	Description string `json:"description"`
-	Country     string `json:"country"`
+	// Country the region is supposedly in (ISO two-letter code).
+	Country string `json:"country"`
 }
 
 func containsSize(region godo.Region, search string) bool {

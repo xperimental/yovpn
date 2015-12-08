@@ -1,3 +1,4 @@
+// Package provisioner provides an interface into DigitalOcean which can be used to provision a VPN endpoint.
 package provisioner
 
 import (
@@ -8,14 +9,27 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Provisioner can be used to provision VPN endpoints.
 type Provisioner interface {
+	// CreateEndpoint stats the creation of a new endpoint in the specified region.
+	// The provisioning itself will happen in a goroutine which will emit a signal when finished.
 	CreateEndpoint(string) Endpoint
+
+	// GetEndpoint returns the data for an endpoint with the specified ID or an error if not found.
 	GetEndpoint(string) (Endpoint, error)
+
+	// ListEndpoints returns a slice of all known endpoints. Not all endpoints will have connection information
+	// if they were created by another provisioner.
 	ListEndpoints() []Endpoint
+
+	// DestroyEndpoint removes the endpoint from DigitalOcean.
+	// If the endpoint can not be found this function will return an error.
 	DestroyEndpoint(string) (Endpoint, error)
 
+	// ListRegions returns a slice with all known regions.
 	ListRegions() ([]Region, error)
 
+	// Signal returns the signal channel used by this provisioner.
 	Signal() chan struct{}
 }
 
@@ -25,10 +39,14 @@ type provisioner struct {
 	signal    chan struct{}
 }
 
-var (
-	ErrNoToken  = fmt.Errorf("No token provided!")
-	ErrNotFound = fmt.Errorf("Endpoint not found!")
-)
+// ErrNoToken is used when the token is empty.
+var ErrNoToken = fmt.Errorf("No token provided.")
+
+// ErrNotFound is used when the endpoint can not be found.
+var ErrNotFound = fmt.Errorf("Endpoint not found!")
+
+// ErrTokenInvalid is used when the provided token is not valid.
+var ErrTokenInvalid = fmt.Errorf("Token is not valid!")
 
 func checkToken(client *godo.Client) bool {
 	log.Println("Checking token...")
@@ -40,6 +58,7 @@ func checkToken(client *godo.Client) bool {
 	return account.Status == "active"
 }
 
+// NewProvisioner creates a new Provisioner with the specified DigitalOcean token.
 func NewProvisioner(token string) (Provisioner, error) {
 	if len(token) == 0 {
 		return nil, ErrNoToken
@@ -49,7 +68,7 @@ func NewProvisioner(token string) (Provisioner, error) {
 	oauthClient := oauth2.NewClient(oauth2.NoContext, tokenSource)
 	client := godo.NewClient(oauthClient)
 	if !checkToken(client) {
-		return nil, fmt.Errorf("Token is not valid!")
+		return nil, ErrTokenInvalid
 	}
 
 	result := &provisioner{

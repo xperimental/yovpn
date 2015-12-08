@@ -28,7 +28,6 @@ func main() {
 
 	log.Info("Setup handlers...")
 	web.SetupHandlers(provisioner)
-	http.HandleFunc("/", web.BlankPage)
 
 	log.Infof("Listen on %s", config.Port)
 	log.Fatal(http.ListenAndServe(":"+config.Port, nil))

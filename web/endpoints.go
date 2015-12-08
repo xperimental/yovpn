@@ -6,7 +6,7 @@ import (
 	"github.com/xperimental/yovpn/provisioner"
 )
 
-func EndpointHandler(provisioner provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
+func endpointHandler(provisioner provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")
 		if len(id) == 0 {
@@ -28,7 +28,7 @@ type deleteResult struct {
 	Count int `json:"count"`
 }
 
-func CleanupHandler(provisioner provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
+func cleanupHandler(provisioner provisioner.Provisioner) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		endpoints := provisioner.ListEndpoints()
 		for _, endpoint := range endpoints {
