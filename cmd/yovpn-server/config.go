@@ -1,11 +1,11 @@
-package config
+package main
 
 import (
 	"flag"
 	"os"
 )
 
-type Config struct {
+type serverConfig struct {
 	Port  string
 	Token string
 }
@@ -13,7 +13,7 @@ type Config struct {
 var portFlag = flag.String("port", "8080", "Port to run HTTP server on")
 var tokenFlag = flag.String("token", "", "DigitalOcean access token")
 
-func GetConfig() *Config {
+func createConfig() *serverConfig {
 	flag.Parse()
 
 	port := os.Getenv("PORT")
@@ -26,7 +26,7 @@ func GetConfig() *Config {
 		token = *tokenFlag
 	}
 
-	return &Config{
+	return &serverConfig{
 		Port:  port,
 		Token: token,
 	}

@@ -1,10 +1,10 @@
+// This package provides a binary that provides a HTTP endpoint to be used for provisioning multiple VPN endpoints.
 package main
 
 import (
 	"net/http"
 
 	"github.com/prometheus/common/log"
-	"github.com/xperimental/yovpn/config"
 	"github.com/xperimental/yovpn/provisioner"
 	"github.com/xperimental/yovpn/web"
 )
@@ -17,7 +17,7 @@ func backgroundRunner(p provisioner.Provisioner) {
 }
 
 func main() {
-	config := config.GetConfig()
+	config := createConfig()
 
 	log.Info("Create provisioner...")
 	provisioner, err := provisioner.NewProvisioner(config.Token)
