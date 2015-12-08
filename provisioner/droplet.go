@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/digitalocean/godo"
-	"github.com/xperimental/yovpn/share"
+	"github.com/xperimental/yovpn/provisioner/config"
 )
 
 const (
@@ -13,10 +13,6 @@ const (
 	defaultImage = "ubuntu-14-04-x64"
 	defaultSize  = "512mb"
 )
-
-func readCloudConfig() string {
-	return share.CloudConfig
-}
 
 func createDroplet(client *godo.Client, key *godo.Key, region string, id string) (*godo.Droplet, error) {
 	createRequest := &godo.DropletCreateRequest{
@@ -30,7 +26,7 @@ func createDroplet(client *godo.Client, key *godo.Key, region string, id string)
 		Backups:           false,
 		IPv6:              false,
 		PrivateNetworking: false,
-		UserData:          share.CloudConfig,
+		UserData:          config.CloudConfig,
 	}
 	drop, _, err := client.Droplets.Create(createRequest)
 	return drop, err

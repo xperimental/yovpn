@@ -1,3 +1,4 @@
+// This package provides a binary that can be used to provision a VPN endpoint from the command-line.
 package main
 
 import (

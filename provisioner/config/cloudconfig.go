@@ -1,6 +1,7 @@
-package share
+package config
 
-var CloudConfig string = `
+// CloudConfig contains the configuration that is sent to the server to start the configuration process.
+const CloudConfig = `
 #cloud-config
 packages:
     - openvpn
