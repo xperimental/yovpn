@@ -4,14 +4,19 @@ package web
 import (
 	"net/http"
 
+	"github.com/labstack/echo"
 	"github.com/xperimental/yovpn/provisioner"
 )
 
-// SetupHandlers sets up the handler functions for a provisioner.
-func SetupHandlers(provisioner provisioner.Provisioner) {
-	http.HandleFunc("/cleanup", cleanupHandler(provisioner))
-	http.HandleFunc("/endpoint", endpointHandler(provisioner))
-	http.HandleFunc("/provision", startProvision(provisioner))
-	http.HandleFunc("/regions", regionsHandler(provisioner))
-	http.HandleFunc("/", blankPage)
+// CreateServer sets up a HTTP server for a provisioner.
+func CreateServer(provisioner provisioner.Provisioner) http.Handler {
+	e := echo.New()
+
+	e.Get("/cleanup", cleanupHandler(provisioner))
+	e.Get("/endpoint", endpointHandler(provisioner))
+	e.Get("/provision", startProvision(provisioner))
+	e.Get("/regions", regionsHandler(provisioner))
+	e.Get("/", blankPage)
+
+	return e
 }

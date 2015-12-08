@@ -26,9 +26,9 @@ func main() {
 	}
 	go backgroundRunner(provisioner)
 
-	log.Info("Setup handlers...")
-	web.SetupHandlers(provisioner)
+	log.Info("Create server...")
+	server := web.CreateServer(provisioner)
 
 	log.Infof("Listen on %s", config.Port)
-	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
+	log.Fatal(http.ListenAndServe(":"+config.Port, server))
 }
