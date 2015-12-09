@@ -67,6 +67,13 @@ yovpn-server -port 8080 -token c0ff33
 
 *Note:* The HTTP server is currently not suitable for use as very important features are missing.
 
+## Heroku
+
+If you are really daring you can already deploy the HTTP server to [Heroku](https://www.heroku.com).
+You will still need to create the DigitalOcean token beforehand.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/xperimental/yovpn/tree/heroku)
+
 ## HTTP Endpoints
 
 The HTTP server currently has the following endpoints:
