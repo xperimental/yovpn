@@ -1,0 +1,90 @@
+{
+	"ImportPath": "github.com/xperimental/yovpn",
+	"GoVersion": "go1.5.1",
+	"Packages": [
+		"github.com/xperimental/yovpn/cmd/yovpn-cli",
+		"github.com/xperimental/yovpn/cmd/yovpn-server",
+		"github.com/xperimental/yovpn/provisioner",
+		"github.com/xperimental/yovpn/provisioner/config",
+		"github.com/xperimental/yovpn/web"
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.8.7",
+			"Rev": "418b41d23a1bf978c06faea5313ba194650ac088"
+		},
+		{
+			"ImportPath": "github.com/digitalocean/godo",
+			"Comment": "v0.9.0-14-gddf63a4",
+			"Rev": "ddf63a4cb0a993f761978611b715de79ecd947f8"
+		},
+		{
+			"ImportPath": "github.com/google/go-querystring/query",
+			"Rev": "2a60fc2ba6c19de80291203597d752e9ba58e4c0"
+		},
+		{
+			"ImportPath": "github.com/labstack/echo",
+			"Comment": "v1.3-3-g5cd194b",
+			"Rev": "5cd194b6b073541a5ab6c80d7ba8162be373d007"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/color",
+			"Comment": "v0.0.3-22-gcc4f298",
+			"Rev": "cc4f2986014fdd1f2e7800b3c082af17cad28db2"
+		},
+		{
+			"ImportPath": "github.com/labstack/gommon/log",
+			"Comment": "v0.0.3-22-gcc4f298",
+			"Rev": "cc4f2986014fdd1f2e7800b3c082af17cad28db2"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Rev": "51a7e7a8b1665b25ca173debdc8d52d493348f15"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "d6aaa2f596ae91a0a58d8e7f2c79670991468e4f"
+		},
+		{
+			"ImportPath": "github.com/pborman/uuid",
+			"Rev": "cccd189d45f7ac3368a0d127efb7f4d08ae0b655"
+		},
+		{
+			"ImportPath": "github.com/prometheus/common/log",
+			"Rev": "4fdc91a58c9d3696b982e8a680f4997403132d44"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Rev": "e4ec8152c15fc46bd5056ce65997a07c7d415325"
+		},
+		{
+			"ImportPath": "github.com/tent/http-link-go",
+			"Rev": "ac974c61c2f990f4115b119354b5e0b47550e888"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "7b85b097bf7527677d54d3220065e966a0e3b613"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "7b85b097bf7527677d54d3220065e966a0e3b613"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "438097d76259d4670fb324c834c2426a7f1946f8"
+		},
+		{
+			"ImportPath": "golang.org/x/net/http2",
+			"Rev": "438097d76259d4670fb324c834c2426a7f1946f8"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "438097d76259d4670fb324c834c2426a7f1946f8"
+		},
+		{
+			"ImportPath": "golang.org/x/oauth2",
+			"Rev": "2baa8a1b9338cf13d9eeb27696d761155fa480be"
+		}
+	]
+}
