@@ -1,5 +1,7 @@
 # yovpn
 
+**Note:** I have not worked on this project for _a long time_. I'm not actually using this as a VPN server implementation anymore (I've switched to Wireguard for my VPN needs), but reimplementing this project with Wireguard might be something I'd do in the future at some point. For now, I recommend not to use this software when you actually need a VPN, but only for educational or entertainment purposes.
+
 yovpn is a server that can be used to create VPN endpoints on public cloud infrastructure. Currently only DigitalOcean is supported as a provider.
 
 The aim of VPNs created using this tool is mainly to avoid IP geolocation and not provide secure internet access. As such, the security of the VPN tunnel is not very high and no public-key cryptography is used to keep setup simple.
